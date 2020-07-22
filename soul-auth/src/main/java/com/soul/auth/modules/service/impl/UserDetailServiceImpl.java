@@ -24,7 +24,7 @@ import java.util.List;
  * @date 2020/7/21 22:54
  **/
 @Slf4j
-@Service
+@Service("userDetailsService")
 public class UserDetailServiceImpl implements UserDetailsService {
 
     @Autowired

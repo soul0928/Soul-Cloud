@@ -41,14 +41,17 @@ public class SoulWebSecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                //放行options方法请求
-                .antMatchers(HttpMethod.OPTIONS).permitAll()
+        http.cors().and().csrf().disable()
+                .anonymous().disable()
+                .authorizeRequests()
+                .antMatchers(HttpMethod.OPTIONS, "/keyPair/rsa/publicKey").permitAll();
+        /*http.authorizeRequests()
+                .antMatchers("/keyPair/rsa/publicKey").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .httpBasic()
                 .and()
-                .csrf().disable();
+                .csrf().disable();*/
     }
 
     @Override
@@ -56,6 +59,5 @@ public class SoulWebSecurityConfig extends WebSecurityConfigurerAdapter {
     public AuthenticationManager authenticationManager() throws Exception {
         return super.authenticationManager();
     }
-
 
 }

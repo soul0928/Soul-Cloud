@@ -1,9 +1,11 @@
 package com.soul.auth.config;
 
+import com.soul.auth.config.jwt.JwtTokenEnhancer;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -14,9 +16,16 @@ import org.springframework.security.oauth2.config.annotation.web.configuration.E
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerSecurityConfigurer;
 import org.springframework.security.oauth2.provider.token.DefaultTokenServices;
+import org.springframework.security.oauth2.provider.token.TokenEnhancer;
+import org.springframework.security.oauth2.provider.token.TokenEnhancerChain;
 import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter;
+import org.springframework.security.oauth2.provider.token.store.KeyStoreKeyFactory;
 import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
-import sun.jvmstat.perfdata.monitor.PerfStringConstantMonitor;
+
+import java.security.KeyPair;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 授权/认证服务器配置
@@ -54,6 +63,9 @@ public class SoulAuthorizationServerConfig extends AuthorizationServerConfigurer
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private JwtTokenEnhancer jwtTokenEnhancer;
+
     /**
      * 配置认证管理器
      * @author wangdong
@@ -61,14 +73,32 @@ public class SoulAuthorizationServerConfig extends AuthorizationServerConfigurer
      * @return void
      **/
     @Override
-    public void configure(AuthorizationServerEndpointsConfigurer endpoints) {
+    public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+
+        //配置认证管理器 redis
+       /* endpoints.authenticationManager(authenticationManager)
+                //配置用户服务
+                .userDetailsService(userDetailsService)
+                //配置token存储的服务与位置
+                .tokenServices(tokenService())
+                .tokenStore(tokenStore());*/
+
+        TokenEnhancerChain enhancerChain = new TokenEnhancerChain();
+        List<TokenEnhancer> delegates = new ArrayList<>();
+        delegates.add(jwtTokenEnhancer); 
+        delegates.add(accessTokenConverter());
+        //配置JWT的内容增强器
+        enhancerChain.setTokenEnhancers(delegates);
+
         //配置认证管理器
         endpoints.authenticationManager(authenticationManager)
                 //配置用户服务
                 .userDetailsService(userDetailsService)
                 //配置token存储的服务与位置
-                .tokenServices(tokenService())
-                .tokenStore(tokenStore());
+                //.tokenServices(tokenService())
+                //.tokenStore(tokenStore())
+                .accessTokenConverter(accessTokenConverter())
+                .tokenEnhancer(enhancerChain);
     }
 
     /**
@@ -140,6 +170,20 @@ public class SoulAuthorizationServerConfig extends AuthorizationServerConfigurer
         // refresh_token有效期，设置一周
         tokenServices.setRefreshTokenValiditySeconds(7 * 24 * 60 * 60);
         return tokenServices;
+    }
+
+    @Bean
+    public JwtAccessTokenConverter accessTokenConverter() {
+        JwtAccessTokenConverter jwtAccessTokenConverter = new JwtAccessTokenConverter();
+        jwtAccessTokenConverter.setKeyPair(keyPair());
+        return jwtAccessTokenConverter;
+    }
+
+    @Bean
+    public KeyPair keyPair() {
+        //从classpath下的证书中获取秘钥对
+        KeyStoreKeyFactory keyStoreKeyFactory = new KeyStoreKeyFactory(new ClassPathResource("jwt.jks"), "soul0928".toCharArray());
+        return keyStoreKeyFactory.getKeyPair("jwt", "soul0928".toCharArray());
     }
 
 }

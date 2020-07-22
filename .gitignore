@@ -25,3 +25,6 @@ bin/push-dev.sh
 target
 /pom.xml.versionsBackup
 /gpg
+/**/mvnw
+/**/mvnw.cmd
+/**/.mvn/
