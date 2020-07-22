@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.soul</groupId>
+        <artifactId>Soul</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+
+    <groupId>com.soul.common</groupId>
+    <artifactId>Soul-Common</artifactId>
+    <packaging>pom</packaging>
+    <name>Soul-Common</name>
+    <description>soul-common通用模块</description>
+
+    <modules>
+        <module>soul-common-core</module>
+        <module>soul-common-pojo</module>
+        <module>soul-common-api</module>
+        <module>soul-common-log</module>
+    </modules>
+
+</project>

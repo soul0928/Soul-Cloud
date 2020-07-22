@@ -1,0 +1,48 @@
+
+spring:
+  profiles:
+    active: dev
+  application:
+    name: soul_gateway
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+  cloud:
+    nacos:
+      discovery:
+        group: Soul
+        server-addr: 123.57.73.216:8848
+        namespace: 7a42b5b9-9667-45bd-907f-906f4cbea74b
+      config:
+        server-addr: 123.57.73.216:8848
+        namespace: 7a42b5b9-9667-45bd-907f-906f4cbea74b
+        encode: UTF-8
+        file-extension: yml
+        group: Soul
+    gateway:
+      routes: #配置路由规则
+        - id: soul_auth
+          uri: lb://soul_auth
+          predicates:
+            - Path=/api/**
+          filters:
+            - StripPrefix=1
+      discovery:
+        locator:
+          enabled: true # 开启从注册中心动态创建路由的功能
+          lower-case-service-id: true # 使用小写服务名，默认是大写
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: 'http://localhost:18090/keyPair/rsa/publicKey' #配置RSA的公钥访问地址
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: ALWAYS
+
